@@ -11,12 +11,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     GoogleMap googleMap;
     SupportMapFragment mapFragment;
+    GroundOverlayOptions loc_mark;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,17 +29,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
     }
     @Override
-    public void onMapReady(GoogleMap googleMap){
+    public void onMapReady(final GoogleMap googleMap){ //맵이 다 준비되었을 때 호출되는 메서드
         this.googleMap=googleMap;
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(25.986818, 79.646946),17));
         googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                loc_mark=new GroundOverlayOptions();
+                loc_mark.image(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher)).position(latLng,100f,100f);
+                googleMap.addGroundOverlay(loc_mark);
+
+            }
+        });
     }
     public static final int ITEM_SATELLITE = 1;
     public static final int ITEM_NOMAL = 2;
     public static final int ITEM_EASTHHRN_SEA = 3;
     public static final int ITEM_CHUNILMIDDLE = 4;
     public static final int ITEM_BUDAFAST = 5;
+    public static final int ITEM_MARK_CLEAR = 6;
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         super.onCreateOptionsMenu(menu);
@@ -45,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         hotMenu.add(0,3,0,"강릉 안목해변");
         hotMenu.add(0,4,0,"천일 중학");
         hotMenu.add(0,5,0,"부다페스트");
-//        menu.add(0, 3, 0, "강릉 안목해변");
+        menu.add(0,ITEM_MARK_CLEAR,0,"위치 아이콘 제거");
 
         return true;
     }
@@ -63,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case ITEM_CHUNILMIDDLE: googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.546031, 127.127477), 100));
                 return true;
             case ITEM_BUDAFAST: googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.495047, 19.040505),50));
+                return true;
+            case ITEM_MARK_CLEAR: googleMap.clear();
                 return true;
         }
         return false;
